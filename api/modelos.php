@@ -5,7 +5,7 @@ header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 header("Content-Type: application/json; charset=UTF-8");
 
 require_once "../config/Constantes.php";
-require_once "../Configuracion/Conexion.php";
+require_once "../config/Conexion.php";
 
 $db = new Conexion();
 $conn = $db->abrir_conexion();
