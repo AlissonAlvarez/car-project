@@ -4,6 +4,7 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
 interface Vehiculo {
   placa: string;
+  estado: string;
   color: string;
   año: number;
   precio_dia: number;
@@ -18,14 +19,15 @@ interface Vehiculo {
 interface Props {
   abierto: boolean;
   cerrar: () => void;
-  guardar: (data: Vehiculo) => void;
+  guardar: (data: FormData) => void; // <-- ahora recibe FormData
   vehiculoEditar: Vehiculo | null;
-  errorPlaca?: string; // <-- agregado
+  errorPlaca?: string;
 }
 
 const VehiculoModal: React.FC<Props> = ({ abierto, cerrar, guardar, vehiculoEditar, errorPlaca }) => {
   const [form, setForm] = useState<Vehiculo>({
     placa: "",
+    estado: "Disponible",
     color: "",
     año: 2024,
     precio_dia: 0,
@@ -39,6 +41,7 @@ const VehiculoModal: React.FC<Props> = ({ abierto, cerrar, guardar, vehiculoEdit
 
   const [modelos, setModelos] = useState<{id_modelo: string, nombre_modelo: string}[]>([]);
   const [seguros, setSeguros] = useState<{id_seguro: string, nombre_compania: string}[]>([]);
+  const [archivoImagen, setArchivoImagen] = useState<File | null>(null); // <-- nuevo estado para la imagen
 
   useEffect(() => {
     if (vehiculoEditar) {
@@ -47,11 +50,13 @@ const VehiculoModal: React.FC<Props> = ({ abierto, cerrar, guardar, vehiculoEdit
         año: Number(vehiculoEditar.año),
         precio_dia: Number(vehiculoEditar.precio_dia),
         kilometraje: Number(vehiculoEditar.kilometraje),
-        comision_afiliado: Number(vehiculoEditar.comision_afiliado || 15)
+        comision_afiliado: Number(vehiculoEditar.comision_afiliado || 15),
+        estado: vehiculoEditar.estado || "Disponible",
       });
     } else {
       setForm({
         placa: "",
+        estado: "Disponible",
         color: "",
         año: 2024,
         precio_dia: 0,
@@ -62,6 +67,7 @@ const VehiculoModal: React.FC<Props> = ({ abierto, cerrar, guardar, vehiculoEdit
         imagen_principal: "",
         comision_afiliado: 15,
       });
+      setArchivoImagen(null);
     }
   }, [vehiculoEditar]);
 
@@ -88,6 +94,28 @@ const VehiculoModal: React.FC<Props> = ({ abierto, cerrar, guardar, vehiculoEdit
     });
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setArchivoImagen(e.target.files[0]);
+    }
+  };
+
+  const handleGuardar = () => {
+    const formData = new FormData();
+    Object.entries(form).forEach(([key, value]) => {
+      formData.append(key, value as any);
+    });
+
+    if (archivoImagen) {
+      formData.append("imagen_principal", archivoImagen);
+    } else if (vehiculoEditar?.imagen_principal) {
+      formData.append("imagen_antigua", vehiculoEditar.imagen_principal); // <-- agregado
+    }
+
+    if (vehiculoEditar) formData.append("accion", "actualizar"); // <-- agregado
+    guardar(formData);
+  };
+
   if (!abierto) return null;
 
   return (
@@ -104,64 +132,187 @@ const VehiculoModal: React.FC<Props> = ({ abierto, cerrar, guardar, vehiculoEdit
             <div className="modal-body">
               <form>
                 <div className="row g-3">
+
+                  {/* Placa */}
                   <div className="col-md-6">
+                    <label htmlFor="placa" className="form-label">Placa</label>
                     <input
+                      id="placa"
                       type="text"
-                      className={`form-control ${errorPlaca ? "is-invalid" : ""}`} // <-- agregado
+                      className={`form-control ${errorPlaca ? "is-invalid" : ""}`}
                       name="placa"
-                      placeholder="Placa"
+                      placeholder="Ingrese la placa"
                       value={form.placa}
                       onChange={handleChange}
                       disabled={!!vehiculoEditar}
                       required
                     />
-                    {errorPlaca && <div className="invalid-feedback">{errorPlaca}</div>} {/* <-- agregado */}
+                    {errorPlaca && <div className="invalid-feedback">{errorPlaca}</div>}
                   </div>
 
+                  {/* Estado */}
                   <div className="col-md-6">
-                    <input type="text" className="form-control" name="color" placeholder="Color" value={form.color} onChange={handleChange} required />
+                    <label htmlFor="estado" className="form-label">Estado</label>
+                    <select
+                      id="estado"
+                      className="form-select"
+                      name="estado"
+                      value={form.estado}
+                      onChange={handleChange}
+                      required
+                    >
+                      <option value="Disponible">Disponible</option>
+                      <option value="Alquilado">Alquilado</option>
+                      <option value="Mantenimiento">Mantenimiento</option>
+                      <option value="Fuera de servicio">Fuera de servicio</option>
+                    </select>
                   </div>
+
+                  {/* Color */}
                   <div className="col-md-6">
-                    <input type="number" className="form-control" name="año" placeholder="Año" value={form.año} onChange={handleChange} required />
+                    <label htmlFor="color" className="form-label">Color</label>
+                    <input
+                      id="color"
+                      type="text"
+                      className="form-control"
+                      name="color"
+                      placeholder="Ingrese el color"
+                      value={form.color}
+                      onChange={handleChange}
+                      required
+                    />
                   </div>
+
+                  {/* Año */}
                   <div className="col-md-6">
-                    <input type="number" className="form-control" name="precio_dia" placeholder="Precio por día" value={form.precio_dia} onChange={handleChange} required />
+                    <label htmlFor="año" className="form-label">Año</label>
+                    <input
+                      id="año"
+                      type="number"
+                      className="form-control"
+                      name="año"
+                      placeholder="Ingrese el año"
+                      value={form.año}
+                      onChange={handleChange}
+                      required
+                    />
                   </div>
+
+                  {/* Precio Día */}
                   <div className="col-md-6">
-                    <input type="number" className="form-control" name="kilometraje" placeholder="Kilometraje" value={form.kilometraje} onChange={handleChange} required />
+                    <label htmlFor="precio_dia" className="form-label">Precio por Día</label>
+                    <input
+                      id="precio_dia"
+                      type="number"
+                      className="form-control"
+                      name="precio_dia"
+                      placeholder="Ingrese el precio por día"
+                      value={form.precio_dia}
+                      onChange={handleChange}
+                      required
+                    />
                   </div>
+
+                  {/* Kilometraje */}
                   <div className="col-md-6">
-                    <input type="number" className="form-control" name="comision_afiliado" placeholder="Comisión Afiliado %" value={form.comision_afiliado} onChange={handleChange} required />
+                    <label htmlFor="kilometraje" className="form-label">Kilometraje</label>
+                    <input
+                      id="kilometraje"
+                      type="number"
+                      className="form-control"
+                      name="kilometraje"
+                      placeholder="Ingrese el kilometraje"
+                      value={form.kilometraje}
+                      onChange={handleChange}
+                      required
+                    />
                   </div>
+
+                  {/* Comisión Afiliado */}
                   <div className="col-md-6">
-                    <select className="form-select" name="id_modelo" value={form.id_modelo} onChange={handleChange} required>
+                    <label htmlFor="comision_afiliado" className="form-label">Comisión Afiliado (%)</label>
+                    <input
+                      id="comision_afiliado"
+                      type="number"
+                      className="form-control"
+                      name="comision_afiliado"
+                      placeholder="Ingrese comisión"
+                      value={form.comision_afiliado}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
+
+                  {/* Modelo */}
+                  <div className="col-md-6">
+                    <label htmlFor="id_modelo" className="form-label">Modelo</label>
+                    <select
+                      id="id_modelo"
+                      className="form-select"
+                      name="id_modelo"
+                      value={form.id_modelo}
+                      onChange={handleChange}
+                      required
+                    >
                       <option value="">Seleccione Modelo</option>
                       {modelos.map(m => (
                         <option key={m.id_modelo} value={m.id_modelo}>{m.nombre_modelo}</option>
                       ))}
                     </select>
                   </div>
+
+                  {/* Seguro */}
                   <div className="col-md-6">
-                    <select className="form-select" name="id_seguro" value={form.id_seguro} onChange={handleChange} required>
+                    <label htmlFor="id_seguro" className="form-label">Seguro</label>
+                    <select
+                      id="id_seguro"
+                      className="form-select"
+                      name="id_seguro"
+                      value={form.id_seguro}
+                      onChange={handleChange}
+                      required
+                    >
                       <option value="">Seleccione Seguro</option>
                       {seguros.map(s => (
                         <option key={s.id_seguro} value={s.id_seguro}>{s.nombre_compania}</option>
                       ))}
                     </select>
                   </div>
+
+                  {/* Descripción */}
                   <div className="col-12">
-                    <textarea className="form-control" name="descripcion" placeholder="Descripción" value={form.descripcion} onChange={handleChange} required></textarea>
+                    <label htmlFor="descripcion" className="form-label">Descripción</label>
+                    <textarea
+                      id="descripcion"
+                      className="form-control"
+                      name="descripcion"
+                      placeholder="Ingrese descripción"
+                      value={form.descripcion}
+                      onChange={handleChange}
+                      required
+                    ></textarea>
                   </div>
+
+                  {/* Imagen */}
                   <div className="col-12">
-                    <input type="text" className="form-control" name="imagen_principal" placeholder="URL Imagen" value={form.imagen_principal} onChange={handleChange} required />
+                    <label htmlFor="imagen_principal" className="form-label">Imagen del Vehículo</label>
+                    <input
+                      id="imagen_principal"
+                      type="file"
+                      className="form-control"
+                      onChange={handleFileChange}
+                    />
                   </div>
+
                 </div>
               </form>
             </div>
 
             <div className="d-flex gap-2 p-3 w-100">
               <button type="button" className="btn btn-secondary w-100" onClick={cerrar}>Cancelar</button>
-              <button type="button" className="btn btn-danger w-100" onClick={() => guardar(form)}>{vehiculoEditar ? "Actualizar" : "Agregar"}</button>
+              <button type="button" className="btn btn-danger w-100" onClick={handleGuardar}>
+                {vehiculoEditar ? "Actualizar" : "Agregar"}
+              </button>
             </div>
           </div>
         </div>

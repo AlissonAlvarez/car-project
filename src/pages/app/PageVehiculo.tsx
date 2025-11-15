@@ -1,5 +1,5 @@
-import Header from "../layout/Header";
-import ViewVehiculos from "../organism/ViewVehiculos";
+import Header from "../../layout/Header";
+import ViewVehiculos from "../../organism/ViewVehiculos";
 
 const PageVehiculo = () => {
   return (

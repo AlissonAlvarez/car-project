@@ -665,21 +665,21 @@ INSERT INTO Empleados (id_usuario, cargo, salario, fecha_contratacion, id_sucurs
 
 -- Tabla: Vehiculo
 INSERT INTO Vehiculo (placa, color, año, precio_dia, estado, kilometraje, imagen_principal, descripcion, destacado, calificacion_promedio, numero_reseñas, id_modelo, id_seguro, es_afiliado, id_propietario, comision_afiliado) VALUES
-('ABC123', 'Blanco', 2023, 120000.00, 'Disponible', 15000, 'https://example.com/vehiculos/abc123.jpg', 'Toyota Corolla en excelente estado, ideal para ciudad', TRUE, 4.80, 25, 'MOD001', 'SEG001', FALSE, NULL, 0.00),
-('DEF456', 'Negro', 2024, 180000.00, 'Disponible', 8000, 'https://example.com/vehiculos/def456.jpg', 'RAV4 espaciosa y cómoda para viajes familiares', TRUE, 4.90, 18, 'MOD002', 'SEG003', FALSE, NULL, 0.00),
-('GHI789', 'Gris', 2023, 130000.00, 'Disponible', 22000, 'https://example.com/vehiculos/ghi789.jpg', 'Honda Civic deportivo y eficiente', FALSE, 4.50, 12, 'MOD003', 'SEG001', FALSE, NULL, 0.00),
-('JKL012', 'Azul', 2024, 170000.00, 'Disponible', 5000, 'https://example.com/vehiculos/jkl012.jpg', 'Honda CR-V, perfecta para aventuras', TRUE, 4.70, 20, 'MOD004', 'SEG002', FALSE, NULL, 0.00),
-('MNO345', 'Rojo', 2023, 160000.00, 'Alquilado', 18000, 'https://example.com/vehiculos/mno345.jpg', 'Mazda CX-5 con tecnología avanzada', FALSE, 4.60, 15, 'MOD005', 'SEG001', FALSE, NULL, 0.00),
-('PQR678', 'Amarillo', 2022, 80000.00, 'Disponible', 35000, 'https://example.com/vehiculos/pqr678.jpg', 'Chevrolet Spark económico para ciudad', TRUE, 4.30, 30, 'MOD006', 'SEG004', FALSE, NULL, 0.00),
-('STU901', 'Blanco', 2024, 150000.00, 'Disponible', 10000, 'https://example.com/vehiculos/stu901.jpg', 'Chevrolet Tracker moderna SUV', FALSE, 4.75, 10, 'MOD007', 'SEG002', FALSE, NULL, 0.00),
-('VWX234', 'Gris', 2023, 175000.00, 'Mantenimiento', 20000, 'https://example.com/vehiculos/vwx234.jpg', 'Ford Escape confiable y espaciosa', FALSE, 4.55, 14, 'MOD008', 'SEG001', FALSE, NULL, 0.00),
-('YZA567', 'Plata', 2022, 95000.00, 'Disponible', 40000, 'https://example.com/vehiculos/yza567.jpg', 'Nissan Versa eficiente en combustible', FALSE, 4.40, 22, 'MOD009', 'SEG004', FALSE, NULL, 0.00),
-('BCD890', 'Negro', 2024, 190000.00, 'Disponible', 6000, 'https://example.com/vehiculos/bcd890.jpg', 'Hyundai Tucson premium', TRUE, 4.85, 16, 'MOD010', 'SEG003', FALSE, NULL, 0.00),
-('EFG123', 'Blanco', 2023, 165000.00, 'Disponible', 12000, 'https://example.com/vehiculos/efg123.jpg', 'Kia Sportage con gran capacidad', FALSE, 4.65, 19, 'MOD011', 'SEG002', FALSE, NULL, 0.00),
-('HIJ456', 'Azul', 2024, 140000.00, 'Disponible', 7000, 'https://example.com/vehiculos/hij456.jpg', 'VW Jetta elegante y confortable', FALSE, 4.70, 13, 'MOD012', 'SEG001', FALSE, NULL, 0.00),
-('KLM789', 'Negro', 2024, 350000.00, 'Disponible', 3000, 'https://example.com/vehiculos/klm789.jpg', 'BMW X3 de lujo', TRUE, 5.00, 8, 'MOD013', 'SEG005', FALSE, NULL, 0.00),
-('NOP012', 'Blanco', 2022, 200000.00, 'Disponible', 45000, 'https://example.com/vehiculos/nop012.jpg', 'Toyota Hilux robusta para trabajo', FALSE, 4.80, 11, 'MOD014', 'SEG002', TRUE, 8, 15.00),
-('QRS345', 'Azul', 2024, 220000.00, 'Disponible', 2000, 'https://example.com/vehiculos/qrs345.jpg', 'Toyota Prius híbrido ecológico', TRUE, 4.95, 7, 'MOD015', 'SEG003', TRUE, 9, 15.00);
+('ABC123', 'Blanco', 2023, 120000.00, 'Disponible', 15000, 'https://n9.cl/l8v7i', 'Toyota Corolla en excelente estado, ideal para ciudad', TRUE, 4.80, 25, 'MOD001', 'SEG001', FALSE, NULL, 0.00),
+('DEF456', 'Negro', 2024, 180000.00, 'Disponible', 8000, 'https://n9.cl/l8v7i', 'RAV4 espaciosa y cómoda para viajes familiares', TRUE, 4.90, 18, 'MOD002', 'SEG003', FALSE, NULL, 0.00),
+('GHI789', 'Gris', 2023, 130000.00, 'Disponible', 22000, 'https://n9.cl/l8v7i', 'Honda Civic deportivo y eficiente', FALSE, 4.50, 12, 'MOD003', 'SEG001', FALSE, NULL, 0.00),
+('JKL012', 'Azul', 2024, 170000.00, 'Disponible', 5000, 'https://n9.cl/l8v7i', 'Honda CR-V, perfecta para aventuras', TRUE, 4.70, 20, 'MOD004', 'SEG002', FALSE, NULL, 0.00),
+('MNO345', 'Rojo', 2023, 160000.00, 'Alquilado', 18000, 'https://n9.cl/l8v7i', 'Mazda CX-5 con tecnología avanzada', FALSE, 4.60, 15, 'MOD005', 'SEG001', FALSE, NULL, 0.00),
+('PQR678', 'Amarillo', 2022, 80000.00, 'Disponible', 35000, 'https://n9.cl/l8v7i', 'Chevrolet Spark económico para ciudad', TRUE, 4.30, 30, 'MOD006', 'SEG004', FALSE, NULL, 0.00),
+('STU901', 'Blanco', 2024, 150000.00, 'Disponible', 10000, 'https://n9.cl/l8v7i', 'Chevrolet Tracker moderna SUV', FALSE, 4.75, 10, 'MOD007', 'SEG002', FALSE, NULL, 0.00),
+('VWX234', 'Gris', 2023, 175000.00, 'Mantenimiento', 20000, 'https://n9.cl/l8v7i', 'Ford Escape confiable y espaciosa', FALSE, 4.55, 14, 'MOD008', 'SEG001', FALSE, NULL, 0.00),
+('YZA567', 'Plata', 2022, 95000.00, 'Disponible', 40000, 'https://n9.cl/l8v7i', 'Nissan Versa eficiente en combustible', FALSE, 4.40, 22, 'MOD009', 'SEG004', FALSE, NULL, 0.00),
+('BCD890', 'Negro', 2024, 190000.00, 'Disponible', 6000, 'https://n9.cl/l8v7i', 'Hyundai Tucson premium', TRUE, 4.85, 16, 'MOD010', 'SEG003', FALSE, NULL, 0.00),
+('EFG123', 'Blanco', 2023, 165000.00, 'Disponible', 12000, 'https://n9.cl/l8v7i', 'Kia Sportage con gran capacidad', FALSE, 4.65, 19, 'MOD011', 'SEG002', FALSE, NULL, 0.00),
+('HIJ456', 'Azul', 2024, 140000.00, 'Disponible', 7000, 'https://n9.cl/l8v7i', 'VW Jetta elegante y confortable', FALSE, 4.70, 13, 'MOD012', 'SEG001', FALSE, NULL, 0.00),
+('KLM789', 'Negro', 2024, 350000.00, 'Disponible', 3000, 'https://n9.cl/l8v7i', 'BMW X3 de lujo', TRUE, 5.00, 8, 'MOD013', 'SEG005', FALSE, NULL, 0.00),
+('NOP012', 'Blanco', 2022, 200000.00, 'Disponible', 45000, 'https://n9.cl/l8v7i', 'Toyota Hilux robusta para trabajo', FALSE, 4.80, 11, 'MOD014', 'SEG002', TRUE, 8, 15.00),
+('QRS345', 'Azul', 2024, 220000.00, 'Disponible', 2000, 'https://n9.cl/l8v7i', 'Toyota Prius híbrido ecológico', TRUE, 4.95, 7, 'MOD015', 'SEG003', TRUE, 9, 15.00);
 
 -- Tabla: Solicitudes_Afiliacion
 INSERT INTO Solicitudes_Afiliacion (id_usuario, placa, marca, modelo, año, color, precio_sugerido, documentos_url, estado_solicitud, comentario_admin, id_empleado_revisor, fecha_solicitud, fecha_respuesta) VALUES

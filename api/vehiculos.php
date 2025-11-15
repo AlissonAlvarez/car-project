@@ -44,71 +44,83 @@ if ($method === "GET") {
 }
 
 // -----------------------------
-// RECIBIR DATOS JSON
-// -----------------------------
-$input = json_decode(file_get_contents("php://input"), true);
-if (($method === "POST" || $method === "PUT") && !$input) {
-    echo json_encode(["error" => "JSON inválido o vacío"]);
-    exit;
-}
-
-// -----------------------------
-// CREAR VEHÍCULO
+// POST - CREAR / ACTUALIZAR VEHÍCULO
 // -----------------------------
 if ($method === "POST") {
-    $stmt = $conn->prepare("
-        INSERT INTO Vehiculo 
-        (placa, color, `año`, precio_dia, estado, kilometraje, id_modelo, id_seguro, descripcion, imagen_principal, destacado, es_afiliado, calificacion_promedio, numero_reseñas, comision_afiliado)
-        VALUES (?, ?, ?, ?, 'Disponible', ?, ?, ?, ?, ?, 0, 0, 0, 0, ?)
-    ");
+    $accion = $_POST['accion'] ?? '';
+    $input = $_POST; // datos del formulario
+    $imagen = $_FILES['imagen_principal'] ?? null;
 
-    $stmt->bind_param(
-        "ssdiissssd",
-        $input["placa"],            // s = string
-        $input["color"],            // s = string
-        $input["año"],              // i = int
-        $input["precio_dia"],       // d = decimal
-        $input["kilometraje"],      // i = int
-        $input["id_modelo"],        // s = varchar
-        $input["id_seguro"],        // s = varchar
-        $input["descripcion"],      // s = string
-        $input["imagen_principal"], // s = string
-        $input["comision_afiliado"] // d = decimal
-    );
+    // Manejar la imagen
+    $imagen_ruta = ""; 
+    if ($imagen && $imagen['error'] === UPLOAD_ERR_OK) {
+        $ext = pathinfo($imagen['name'], PATHINFO_EXTENSION);
+        $nombreArchivo = uniqid() . "." . $ext;
+        $rutaDestino = __DIR__ . "/uploads/vehiculos/" . $nombreArchivo;
 
-    ejecutar_stmt($stmt);
-    echo json_encode(["success" => true]);
-    exit;
-}
+        if (!is_dir(__DIR__ . "/uploads/vehiculos")) {
+            mkdir(__DIR__ . "/uploads/vehiculos", 0777, true);
+        }
 
-// -----------------------------
-// ACTUALIZAR VEHÍCULO
-// -----------------------------
-if ($method === "PUT") {
-    $stmt = $conn->prepare("
-        UPDATE Vehiculo SET 
-            color=?, `año`=?, precio_dia=?, kilometraje=?, id_modelo=?, id_seguro=?, descripcion=?, imagen_principal=?, comision_afiliado=?
-        WHERE placa=?
-    ");
+        if (move_uploaded_file($imagen['tmp_name'], $rutaDestino)) {
+            $imagen_ruta = "api/uploads/vehiculos/" . $nombreArchivo;
+        }
+    }
 
-    // Tipos corregidos: s = string, i = int, d = double
-    $stmt->bind_param(
-        "sidisssdss",
-        $input["color"],            // s
-        $input["año"],              // i
-        $input["precio_dia"],       // d
-        $input["kilometraje"],      // i
-        $input["id_modelo"],        // s
-        $input["id_seguro"],        // s
-        $input["descripcion"],      // s
-        $input["imagen_principal"], // s
-        $input["comision_afiliado"],// d
-        $input["placa"]             // s
-    );
+    if ($accion === "actualizar") {
+        // Usar la imagen existente si no se sube nueva
+        $imagen_final = $imagen_ruta ? $imagen_ruta : ($input['imagen_antigua'] ?? '');
 
-    ejecutar_stmt($stmt);
-    echo json_encode(["success" => true]);
-    exit;
+        $stmt = $conn->prepare("
+            UPDATE Vehiculo SET 
+                color=?, `año`=?, precio_dia=?, estado=?, kilometraje=?, id_modelo=?, id_seguro=?, descripcion=?, imagen_principal=?, comision_afiliado=?
+            WHERE placa=?
+        ");
+        // bind_param: tipos s=string, i=int, d=double
+        $stmt->bind_param(
+            "siidissssds",
+            $input["color"],
+            $input["año"],
+            $input["precio_dia"],
+            $input["estado"],
+            $input["kilometraje"],
+            $input["id_modelo"],
+            $input["id_seguro"],
+            $input["descripcion"],
+            $imagen_final,
+            $input["comision_afiliado"],
+            $input["placa"]
+        );
+
+        ejecutar_stmt($stmt);
+        echo json_encode(["success" => true]);
+        exit;
+
+    } else {
+        // Crear vehículo
+        $stmt = $conn->prepare("
+            INSERT INTO Vehiculo 
+            (placa, color, `año`, precio_dia, estado, kilometraje, id_modelo, id_seguro, descripcion, imagen_principal, destacado, es_afiliado, calificacion_promedio, numero_reseñas, comision_afiliado)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0, 0, ?)
+        ");
+        $stmt->bind_param(
+            "ssdisissssd",
+            $input["placa"],
+            $input["color"],
+            $input["año"],
+            $input["precio_dia"],
+            $input["estado"],
+            $input["kilometraje"],
+            $input["id_modelo"],
+            $input["id_seguro"],
+            $input["descripcion"],
+            $imagen_ruta,
+            $input["comision_afiliado"]
+        );
+        ejecutar_stmt($stmt);
+        echo json_encode(["success" => true]);
+        exit;
+    }
 }
 
 // -----------------------------

@@ -5,6 +5,7 @@ const API = "http://localhost/proyectos/car-project/api/vehiculos.php";
 
 interface Vehiculo {
   placa: string;
+  estado: string;
   color: string;
   año: number;
   precio_dia: number;
@@ -22,7 +23,7 @@ const ViewVehiculos = () => {
   const [vehiculos, setVehiculos] = useState<Vehiculo[]>([]);
   const [modalAbierto, setModalAbierto] = useState(false);
   const [vehiculoEditar, setVehiculoEditar] = useState<Vehiculo | null>(null);
-  const [errorPlaca, setErrorPlaca] = useState<string>(""); // <-- agregado
+  const [errorPlaca, setErrorPlaca] = useState<string>("");
 
   // Paginación
   const [paginaActual, setPaginaActual] = useState(1);
@@ -33,7 +34,6 @@ const ViewVehiculos = () => {
     paginaActual * ITEMS_POR_PAGINA
   );
 
-  // Obtener vehículos desde API
   const obtenerVehiculos = async () => {
     try {
       const res = await fetch(API);
@@ -49,52 +49,51 @@ const ViewVehiculos = () => {
     obtenerVehiculos();
   }, []);
 
-  // Agregar o actualizar vehículo
-  const guardarVehiculo = async (veh: Vehiculo) => {
-    try {
-      if (vehiculoEditar) {
-        const vehActualizado = { ...veh, placa: vehiculoEditar.placa };
-        const res = await fetch(API, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(vehActualizado),
-        });
-        const data = await res.json();
-        if (data.error) {
-          alert("Error al actualizar vehículo: " + data.error);
-          return;
-        }
-      } else {
-        const placaExistente = vehiculos.some(v => v.placa === veh.placa);
-        if (placaExistente) {
-          setErrorPlaca("Placa ya registrada"); // <-- reemplaza alert por mensaje en input
-          return;
-        }
+  // Agregar o actualizar vehículo (ahora con FormData)
+  const guardarVehiculo = async (formData: FormData) => {
+  try {
+    const placa = formData.get("placa") as string;
+    if (vehiculoEditar) {
+      // Indicamos que es actualización
+      formData.append("accion", "actualizar");
 
-        const res = await fetch(API, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(veh),
-        });
-        const data = await res.json();
-        if (data.error) {
-          alert("Error al agregar vehículo: " + data.error);
-          return;
-        }
+      const res = await fetch(API, {
+        method: "POST", // <-- usar POST en vez de PUT
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.error) {
+        alert("Error al actualizar vehículo: " + data.error);
+        return;
       }
-
-      setModalAbierto(false);
-      setVehiculoEditar(null);
-      setPaginaActual(1);
-      setErrorPlaca(""); // <-- limpiar error al guardar correctamente
-      obtenerVehiculos();
-    } catch (err) {
-      console.error(err);
-      alert("Error al guardar vehículo");
+    } else {
+      const placaExistente = vehiculos.some(v => v.placa === placa);
+      if (placaExistente) {
+        setErrorPlaca("Placa ya registrada");
+        return;
+      }
+      const res = await fetch(API, {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.error) {
+        alert("Error al agregar vehículo: " + data.error);
+        return;
+      }
     }
-  };
 
-  // Eliminar vehículo
+    setModalAbierto(false);
+    setVehiculoEditar(null);
+    setPaginaActual(1);
+    setErrorPlaca("");
+    obtenerVehiculos();
+  } catch (err) {
+    console.error(err);
+    alert("Error al guardar vehículo");
+  }
+};
+
   const eliminarVehiculo = async (placa: string) => {
     if (!window.confirm("¿Seguro que quieres eliminar este vehículo?")) return;
 
@@ -123,18 +122,19 @@ const ViewVehiculos = () => {
         className="btn btn-danger mb-3"
         onClick={() => {
           setVehiculoEditar(null);
-          setErrorPlaca(""); // <-- limpiar error al abrir modal
+          setErrorPlaca("");
           setModalAbierto(true);
         }}
       >
         Nuevo Vehículo
       </button>
 
-      <table className="table table-hover align-middle">
+      <table className="table table-hover align-middle shadow-sm">
         <thead>
           <tr>
             <th>Imagen</th>
             <th>Placa</th>
+            <th>Estado</th>
             <th>Color</th>
             <th>Año</th>
             <th>Precio Día</th>
@@ -161,6 +161,7 @@ const ViewVehiculos = () => {
                 )}
               </td>
               <td>{v.placa}</td>
+              <td>{v.estado}</td>
               <td>{v.color}</td>
               <td>{v.año}</td>
               <td>${v.precio_dia}</td>
@@ -230,7 +231,7 @@ const ViewVehiculos = () => {
             setVehiculoEditar(null);
             setErrorPlaca("");
           }}
-          guardar={guardarVehiculo}
+          guardar={guardarVehiculo} // ahora recibe FormData
           vehiculoEditar={vehiculoEditar}
           errorPlaca={errorPlaca}
         />
