@@ -1,10 +1,4 @@
 <?php
-// Mostrar errores de PHP (temporal para debug)
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
-// Cabeceras CORS y JSON
 header("Access-Control-Allow-Origin: http://localhost:5173");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
@@ -16,40 +10,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-// Conexión a la base de datos
+// Conectar MySQL
 $conn = new mysqli("localhost", "root", "", "alquiler_vehiculos");
 if ($conn->connect_error) {
-    echo json_encode(["error" => "Error al conectar a la DB: " . $conn->connect_error]);
+    echo json_encode(["error" => "Error DB: " . $conn->connect_error]);
     exit;
 }
 
 $method = $_SERVER["REQUEST_METHOD"];
 
-// -----------------------------
-// LISTAR RESERVAS
-// -----------------------------
-if ($method === "GET") {
-    $result = $conn->query("
-        SELECT r.*, m.nombre_modelo, v.placa, r.observaciones
-        FROM Reservas r
-        LEFT JOIN Vehiculo v ON r.placa = v.placa
-        LEFT JOIN Modelo m ON v.id_modelo = m.id_modelo
-    ");
-
-    if (!$result) {
-        echo json_encode(["error" => $conn->error]);
-        exit;
-    }
-
-    $data = [];
-    while ($row = $result->fetch_assoc()) $data[] = $row;
-    echo json_encode($data);
-    exit;
-}
-
-// -----------------------------
-// CREAR RESERVA SIN USUARIO
-// -----------------------------
+/* ============================================
+   CREAR RESERVA
+   ============================================ */
 if ($method === "POST") {
     $input = json_decode(file_get_contents("php://input"), true);
 
@@ -59,58 +31,75 @@ if ($method === "POST") {
     }
 
     // Validar campos obligatorios
-    if (empty($input["fecha_inicio"]) || empty($input["fecha_fin"]) || empty($input["placa"])) {
+    if (
+        empty($input["fecha_inicio"]) ||
+        empty($input["fecha_fin"]) ||
+        empty($input["placa"]) ||
+        empty($input["id_sucursal"]) ||
+        empty($input["id_usuario"])
+    ) {
         echo json_encode(["error" => "Faltan datos obligatorios"]);
         exit;
     }
 
-    // Limpiar datos
-    $placa = $conn->real_escape_string($input["placa"]);
-    $fecha_inicio = $conn->real_escape_string($input["fecha_inicio"]);
-    $fecha_fin = $conn->real_escape_string($input["fecha_fin"]);
-    $observaciones = isset($input["observaciones"]) ? $conn->real_escape_string($input["observaciones"]) : "";
+    // Datos
+    $fecha_inicio = $input["fecha_inicio"];
+    $fecha_fin = $input["fecha_fin"];
+    $observaciones = $input["observaciones"] ?? "";
+    $placa = $input["placa"];
+    $id_usuario = $input["id_usuario"];
+    $id_sucursal = $input["id_sucursal"];
 
-    // Verificar que el vehículo exista
-    $resVeh = $conn->query("SELECT * FROM Vehiculo WHERE placa = '$placa'");
-    if (!$resVeh) {
-        echo json_encode(["error" => $conn->error]);
+    /* Validar placa */
+    $checkVeh = $conn->query("SELECT placa FROM Vehiculo WHERE placa='$placa'");
+    if ($checkVeh->num_rows == 0) {
+        echo json_encode(["error" => "La placa no existe"]);
         exit;
     }
-    if ($resVeh->num_rows === 0) {
-        echo json_encode(["error" => "Vehículo no existe"]);
+
+    /* Validar usuario */
+    $checkUser = $conn->query("SELECT id_usuario FROM Usuarios WHERE id_usuario=$id_usuario");
+    if ($checkUser->num_rows == 0) {
+        echo json_encode(["error" => "El usuario no existe"]);
         exit;
     }
 
-    // Insertar la reserva sin id_usuario
-    try {
-        $stmt = $conn->prepare("
-            INSERT INTO Reservas 
-            (fecha_inicio, fecha_fin, observaciones, placa, estado)
-            VALUES (?, ?, ?, ?, 'Pendiente')
-        ");
-
-        if (!$stmt) throw new Exception("Error al preparar la consulta: " . $conn->error);
-
-        $stmt->bind_param("ssss", $fecha_inicio, $fecha_fin, $observaciones, $placa);
-
-        if ($stmt->execute()) {
-            echo json_encode([
-                "success" => true,
-                "id_reserva" => $stmt->insert_id
-            ]);
-        } else {
-            throw new Exception($stmt->error);
-        }
-    } catch (Exception $e) {
-        echo json_encode(["error" => $e->getMessage()]);
+    /* Validar sucursal */
+    $checkSuc = $conn->query("SELECT id_sucursal FROM Sucursal WHERE id_sucursal='$id_sucursal'");
+    if ($checkSuc->num_rows == 0) {
+        echo json_encode(["error" => "La sucursal no existe"]);
+        exit;
     }
+
+    // Insertar reserva
+    $stmt = $conn->prepare("
+        INSERT INTO Reservas 
+        (fecha_inicio, fecha_fin, observaciones, placa, id_usuario, id_sucursal, estado)
+        VALUES (?, ?, ?, ?, ?, ?, 'Pendiente')
+    ");
+
+    $stmt->bind_param(
+        "ssssss",
+        $fecha_inicio,
+        $fecha_fin,
+        $observaciones,
+        $placa,
+        $id_usuario,
+        $id_sucursal
+    );
+
+    if ($stmt->execute()) {
+        echo json_encode([
+            "success" => true,
+            "id_reserva" => $stmt->insert_id
+        ]);
+    } else {
+        echo json_encode(["error" => $stmt->error]);
+    }
+
     exit;
 }
 
-// -----------------------------
-// MÉTODO NO SOPORTADO
-// -----------------------------
-http_response_code(405);
 echo json_encode(["error" => "Método no soportado"]);
 exit;
 ?>
