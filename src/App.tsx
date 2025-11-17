@@ -1,14 +1,14 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import HomeVehiculos from './pages/web/InicioWeb'
 import Vehiculos from './pages/app/PageVehiculo'
-import InicioWeb from './pages/web/InicioWeb'
+import Dashboard from './pages/app/HomeDashboard'
 
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<HomeVehiculos />} />
-        <Route path="/dashboard" element={<InicioWeb />} />
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/vehiculos" element={<Vehiculos />} />
       </Routes>
     </Router>

@@ -17,6 +17,7 @@ interface Props {
   onClose: () => void;
   modoReserva: boolean;
   vehiculo: Vehiculo | null;
+  onReservaExitosa?: (placa: string) => void;
 }
 
 const API_USUARIOS = "http://localhost/proyectos/car-project/api/usuarios.php";
@@ -138,18 +139,19 @@ export default function LoginRegister({ onClose, modoReserva, vehiculo }: Props)
                     <textarea id="observaciones" className="form-control"></textarea>
                   </div>
 
-                  {/* ✅ BOTÓN CANCELAR QUE SOLO CIERRA LA MODAL */}
-                  <button
-                    className="btn btn-secondary w-100 mb-2"
-                    onClick={onClose}
-                  >
-                    Cancelar
-                  </button>
+                  
+                  <div className="d-flex w-100 gap-2">
+                    <button
+                        className="btn btn-secondary w-100"
+                        onClick={onClose}
+                    >
+                        Cancelar
+                    </button>
 
-                  {/* BOTÓN CONFIRMAR */}
-                  <button className="btn btn-danger w-100" onClick={reservar}>
-                    Confirmar Reserva
-                  </button>
+                    <button className="btn btn-danger w-100" onClick={reservar}>
+                        Confirmar Reserva
+                    </button>
+                  </div>
                 </>
               ) : (
                 <>

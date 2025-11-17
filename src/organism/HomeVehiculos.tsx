@@ -36,6 +36,9 @@ const HomeVehiculos = () => {
 
   const [usuario, setUsuario] = useState<Usuario | null>(null);
 
+  // NUEVO: para almacenar vehículos ya reservados
+  const [vehiculosReservados, setVehiculosReservados] = useState<string[]>([]);
+
   const obtenerVehiculos = async () => {
     try {
       const res = await fetch(API);
@@ -57,20 +60,20 @@ const HomeVehiculos = () => {
   }, []);
 
   const abrirModalReserva = (vehiculo: Vehiculo) => {
-    const stored = localStorage.getItem("usuario");
-    const user = stored ? JSON.parse(stored) : null;
-
-    if (!user) {
-      // Mostrar modal login
+    if (!usuario) { 
       setModoReserva(false);
       setShowAuthModal(true);
       return;
     }
 
-    // Mostrar modal reserva dentro del LoginRegister
     setVehiculoSeleccionado(vehiculo);
     setModoReserva(true);
     setShowAuthModal(true);
+  };
+
+  // NUEVO: callback para marcar vehículo como reservado
+  const marcarVehiculoReservado = (placa: string) => {
+    setVehiculosReservados((prev) => [...prev, placa]);
   };
 
   return (
@@ -109,10 +112,11 @@ const HomeVehiculos = () => {
 
               <div className="card-footer bg-white border-0 p-2">
                 <button
-                  className="btn btn-secondary fw-bold w-100"
-                  onClick={() => abrirModalReserva(v)}
+                  className={`btn w-100 fw-bold ${vehiculosReservados.includes(v.placa) ? 'btn-secondary' : 'btn-danger'}`}
+                  onClick={() => !vehiculosReservados.includes(v.placa) && abrirModalReserva(v)}
+                  disabled={vehiculosReservados.includes(v.placa)}
                 >
-                  Reservar
+                  {vehiculosReservados.includes(v.placa) ? 'Reservado' : 'Reservar'}
                 </button>
               </div>
 
@@ -126,6 +130,7 @@ const HomeVehiculos = () => {
           onClose={() => setShowAuthModal(false)}
           modoReserva={modoReserva}
           vehiculo={vehiculoSeleccionado}
+          onReservaExitosa={marcarVehiculoReservado} // PASAMOS EL CALLBACK
         />
       )}
     </section>

@@ -19,7 +19,7 @@ interface Vehiculo {
 interface Props {
   abierto: boolean;
   cerrar: () => void;
-  guardar: (data: FormData) => void; // <-- ahora recibe FormData
+  guardar: (data: FormData) => void;
   vehiculoEditar: Vehiculo | null;
   errorPlaca?: string;
 }
@@ -103,7 +103,8 @@ const VehiculoModal: React.FC<Props> = ({ abierto, cerrar, guardar, vehiculoEdit
   const handleGuardar = () => {
     const formData = new FormData();
     Object.entries(form).forEach(([key, value]) => {
-      formData.append(key, value as any);
+      // <-- reemplazo de "any" por string
+      formData.append(key, value !== undefined && value !== null ? String(value) : "");
     });
 
     if (archivoImagen) {

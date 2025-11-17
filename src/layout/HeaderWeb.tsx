@@ -65,18 +65,7 @@ const HeaderWeb = ({ children }: { children?: React.ReactNode }) => {
                   onMouseOver={(e) => (e.currentTarget.style.color = "#f0a500")}
                   onMouseOut={(e) => (e.currentTarget.style.color = "#fff")}
                 >
-                  Inicio
-                </a>
-              </li>
-              <li>
-                <a
-                  href="/conocenos"
-                  className="text-white fw-medium text-decoration-none"
-                  style={{ transition: "color 0.3s" }}
-                  onMouseOver={(e) => (e.currentTarget.style.color = "#f0a500")}
-                  onMouseOut={(e) => (e.currentTarget.style.color = "#fff")}
-                >
-                  Sobre Nosotros
+                  Alquiler de vehciulos
                 </a>
               </li>
             </ul>
