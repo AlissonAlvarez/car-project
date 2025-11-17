@@ -58,7 +58,7 @@ const ViewVehiculos = () => {
       formData.append("accion", "actualizar");
 
       const res = await fetch(API, {
-        method: "POST", // <-- usar POST en vez de PUT
+        method: "POST",
         body: formData,
       });
       const data = await res.json();

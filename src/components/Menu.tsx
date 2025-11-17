@@ -4,6 +4,12 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 import { Link } from "react-router-dom";
 
 const Menu = () => {
+  // Función para cerrar sesión del admin/empleado
+  const cerrarSesion = () => {
+    localStorage.removeItem("usuario"); // elimina el usuario logeado
+    window.location.href = "/"; // redirige a la home pública
+  };
+
   return (
     <div
       className="offcanvas offcanvas-start text-bg-light menu"
@@ -26,8 +32,8 @@ const Menu = () => {
 
       <div className="offcanvas-body">
         <ul className="navbar-nav justify-content-end flex-grow-1 pe-3">
-        <li className="nav-item navegacion">
-            <Link to="/" className="nav-link text-dark d-flex align-items-center gap-0">
+          <li className="nav-item navegacion">
+            <Link to="/dashboard" className="nav-link text-dark d-flex align-items-center gap-0">
               <i className="bi bi-speedometer2 me-2"></i> Dashboard
             </Link>
           </li>
@@ -60,6 +66,13 @@ const Menu = () => {
             <Link to="/usuarios" className="nav-link text-dark d-flex align-items-center gap-2" data-bs-dismiss="offcanvas">
               <i className="bi bi-person-fill"></i> Usuarios
             </Link>
+          </li>
+
+          {/* BOTÓN CERRAR SESIÓN ADMIN */}
+          <li className="nav-item navegacion mt-3">
+            <button className="btn btn-danger w-100" onClick={cerrarSesion}>
+              <i className="bi bi-box-arrow-right me-2"></i> Cerrar sesión
+            </button>
           </li>
         </ul>
       </div>

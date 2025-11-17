@@ -5,6 +5,7 @@ interface Usuario {
   nombres: string;
   apellidos: string;
   email: string;
+  rol?: string; // agregado para manejar roles
 }
 
 interface Vehiculo {
@@ -38,29 +39,71 @@ export default function LoginRegister({ onClose, modoReserva, vehiculo }: Props)
 
   // ---------------- LOGIN ----------------
   const loginUsuario = async () => {
-    try {
-      const res = await fetch(API_USUARIOS, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(loginData),
-      });
+  try {
+    const res = await fetch(API_USUARIOS, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(loginData),
+    });
 
-      const data = await res.json();
+    const data = await res.json();
 
-      if (data.success) {
-        localStorage.setItem("usuario", JSON.stringify(data.usuario));
-        setUsuario(data.usuario);
+    if (data.success) {
+      const usuario = data.usuario;
 
-        window.location.reload();
-        onClose();
-        alert("Login exitoso");
+      // ADMIN CON CONTRASEÑA POR DEFECTO
+      if (usuario.email === "admin@alquiler.com" && loginData.contrasena === "admin123") {
+        usuario.rol = "Administrador";
       } else {
-        alert("Error: " + data.error);
+        // TODOS LOS DEMÁS SON CLIENTES
+        usuario.rol = "Cliente";
       }
-    } catch {
-      alert("Error en login");
+
+      localStorage.setItem("usuario", JSON.stringify(usuario));
+      setUsuario(usuario);
+
+      onClose();
+      alert("Login exitoso");
+      if (usuario.rol === "Administrador") {
+        window.location.href = "/dashboard";
+      } else {
+        window.location.href = "/";
+      }
+
+    } else {
+      alert("Error: " + data.error);
     }
-  };
+  } catch {
+    alert("Error en login");
+  }
+};
+
+
+  // ---------------- REGISTRO ----------------
+const registrarUsuario = async () => {
+  try {
+    const res = await fetch(API_USUARIOS, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(registroData),
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      const usuario = data.usuario;
+      localStorage.setItem("usuario", JSON.stringify(usuario));
+      setUsuario(usuario);
+      alert("Registro exitoso");
+      onClose();
+    } else {
+      alert("Error: " + data.error);
+    }
+  } catch {
+    alert("Error al registrar usuario");
+  }
+};
+
 
   // ---------------- RESERVA ----------------
   const reservar = async () => {
@@ -139,7 +182,6 @@ export default function LoginRegister({ onClose, modoReserva, vehiculo }: Props)
                     <textarea id="observaciones" className="form-control"></textarea>
                   </div>
 
-                  
                   <div className="d-flex w-100 gap-2">
                     <button
                         className="btn btn-secondary w-100"
@@ -207,9 +249,10 @@ export default function LoginRegister({ onClose, modoReserva, vehiculo }: Props)
                           onChange={(e) => setRegistroData({ ...registroData, contrasena: e.target.value })} />
                       </div>
 
-                      <button className="btn btn-danger w-100">
+                      <button className="btn btn-danger w-100" onClick={registrarUsuario}>
                         Registrarse
-                      </button>
+                    </button>
+
 
                       <p className="text-center mt-2">
                         ¿Ya tienes cuenta?{" "}

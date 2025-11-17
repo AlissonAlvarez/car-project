@@ -40,22 +40,43 @@
     // POST: Registro o Login
     if ($method === "POST") {
         // ----------------- Login -----------------
-        if (isset($input['email']) && isset($input['contrasena']) && !isset($input['nombres'])) {
-            $email = $input['email'];
-            $password = $input['contrasena'];
+if (isset($input['email']) && isset($input['contrasena']) && !isset($input['nombres'])) {
+    $email = $input['email'];
+    $password = $input['contrasena'];
 
-            $stmt = $pdo->prepare("SELECT id_usuario, nombres, apellidos, email, contrasena FROM Usuarios WHERE email = :email");
-            $stmt->execute(['email' => $email]);
-            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    $stmt = $pdo->prepare("SELECT id_usuario, nombres, apellidos, email, contrasena, id_rol FROM Usuarios WHERE email = :email");
+    $stmt->execute(['email' => $email]);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            if ($user && password_verify($password, $user['contrasena'])) {
-                unset($user['contrasena']);
-                echo json_encode(["success" => true, "usuario" => $user]);
-            } else {
-                echo json_encode(["success" => false, "error" => "Email o contrasena incorrectos"]);
-            }
-            exit;
-        }
+    // ---------- ADMIN CONTRASEÑA POR DEFECTO ----------
+    if ($email === "admin@alquiler.com" && $password === "admin123") {
+        $user = [
+            "id_usuario" => $user['id_usuario'] ?? 1,
+            "nombres" => $user['nombres'] ?? "Admin",
+            "apellidos" => $user['apellidos'] ?? "Sistema",
+            "email" => "admin@alquiler.com",
+            "rol" => "Administrador"
+        ];
+        echo json_encode(["success" => true, "usuario" => $user]);
+        exit;
+    }
+
+    // ---------- LOGIN NORMAL CON PASSWORD ENCRIPTADO ----------
+    if ($user && password_verify($password, $user['contrasena'])) {
+        // Obtener rol del usuario
+        $stmtRol = $pdo->prepare("SELECT nombre_rol FROM Roles WHERE id_rol = :id_rol");
+        $stmtRol->execute(['id_rol' => $user['id_rol']]);
+        $rol = $stmtRol->fetchColumn();
+
+        unset($user['contrasena']);
+        $user['rol'] = $rol ?? "Cliente";
+
+        echo json_encode(["success" => true, "usuario" => $user]);
+    } else {
+        echo json_encode(["success" => false, "error" => "Email o contrasena incorrectos"]);
+    }
+    exit;
+}
 
         // ----------------- Registro -----------------
         if (isset($input['nombres'], $input['apellidos'], $input['email'], $input['contrasena'])) {

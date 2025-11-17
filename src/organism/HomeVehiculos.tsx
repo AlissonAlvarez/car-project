@@ -90,7 +90,7 @@ const HomeVehiculos = () => {
                   src={v.imagen_principal}
                   className="card-img-top"
                   alt={v.nombre_modelo}
-                  style={{ height: "200px", objectFit: "cover" }}
+                  style={{ height: "200px", objectFit: "cover", borderRadius: "0" }}
                 />
               ) : (
                 <div className="sin-img">Sin imagen</div>
