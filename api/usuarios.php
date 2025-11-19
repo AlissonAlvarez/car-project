@@ -98,7 +98,7 @@ if (isset($input['email']) && isset($input['contrasena']) && !isset($input['nomb
             }
 
             $hashedPassword = password_hash($contrasena, PASSWORD_DEFAULT);
-            $id_rol_default = 1; // Cliente
+            $id_rol_default = 2; // Cliente
 
             $stmt = $pdo->prepare("INSERT INTO Usuarios (nombres, apellidos, email, contrasena, id_rol) VALUES (:nombres, :apellidos, :email, :contrasena, :id_rol)");
             $stmt->execute([
