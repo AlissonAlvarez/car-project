@@ -1,6 +1,5 @@
 -- ============================================
 -- BASE DE DATOS: alquiler_vehiculos
--- VERSIÓN AJUSTADA
 -- ============================================
 CREATE DATABASE IF NOT EXISTS alquiler_vehiculos;
 USE alquiler_vehiculos;
@@ -375,7 +374,7 @@ INSERT INTO Modelo (id_modelo, nombre_modelo, tipo_vehiculo, capacidad, transmis
 -- Tabla: Usuarios
 INSERT INTO Usuarios (nombres, apellidos, email, contrasena, telefono, direccion, cedula, estado, id_rol, puntos_acumulados) VALUES
 ('Admin', 'Sistema', 'admin@alquiler.com', 'admin123', '6011111111', 'Calle 100 # 20-30', '1000000001', 'Activo', 1, 0),
-('Carlos', 'Ramírez', 'carlos.ramirez@email.com', '$2y$10$hashedpassword2', '3101111111', 'Cra 7 # 45-67', '1000000002', 'Activo', 2, 1500),
+('Usuario', 'Sitema', 'user@alquiler.com', 'user123', '3101111111', 'Cra 7 # 45-67', '1000000002', 'Activo', 2, 1500),
 ('María', 'González', 'maria.gonzalez@email.com', '$2y$10$hashedpassword3', '3202222222', 'Calle 80 # 15-20', '1000000003', 'Activo', 2, 3200),
 ('Juan', 'Pérez', 'juan.perez@email.com', '$2y$10$hashedpassword4', '3153333333', 'Av 68 # 50-12', '1000000004', 'Activo', 2, 800),
 ('Ana', 'Martínez', 'ana.martinez@email.com', '$2y$10$hashedpassword5', '3124444444', 'Calle 127 # 45-89', '1000000005', 'Activo', 2, 0),

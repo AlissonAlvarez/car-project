@@ -6,16 +6,7 @@ import "../styles/styles.css";
 export default function Dashboard() {
   const modules = [
     { name: "Vehículos", icon: "bi bi-car-front-fill", color: "bg-danger", path: "/vehiculos" },
-    { name: "Campañas", icon: "bi bi-megaphone-fill", color: "bg-primary", path: "/campanas" },
-    { name: "Anuncios", icon: "bi bi-badge-ad-fill", color: "bg-success", path: "/anuncios" },
-    { name: "Clientes", icon: "bi bi-people-fill", color: "bg-secondary", path: "/clientes" },
-    { name: "Conversiones", icon: "bi bi-chat-dots-fill", color: "bg-warning", path: "/conversiones" },
-    { name: "Cuentas Publicitarias", icon: "bi bi-briefcase-fill", color: "bg-info", path: "/cuentas" },
-    { name: "Métricas", icon: "bi bi-bar-chart-fill", color: "bg-success", path: "/metricas" },
-    { name: "Plataformas", icon: "bi bi-display-fill", color: "bg-primary", path: "/plataformas" },
-    { name: "Reportes Personalizados", icon: "bi bi-file-earmark-text-fill", color: "bg-dark", path: "/reportes" },
-    { name: "Segmentos Audiencias", icon: "bi bi-bullseye", color: "bg-danger", path: "/segmentos" },
-    { name: "Usuarios", icon: "bi bi-person-fill", color: "bg-secondary", path: "/usuarios" },
+    { name: "Reservas", icon: "bi bi-megaphone-fill", color: "bg-primary", path: "/reservas" },
   ];
 
   return (
@@ -32,7 +23,7 @@ export default function Dashboard() {
 
         <div className="row g-4">
           {modules.map((module, i) => (
-            <div key={i} className="col-12 col-sm-6 col-md-4 col-lg-3">
+            <div key={i} className="col-12 col-md-6">
               {module.path ? (
                 <Link to={module.path} className="text-decoration-none text-dark">
                   <div className="card shadow-sm border-0 h-100 text-center p-3 hover-card">

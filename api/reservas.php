@@ -1,16 +1,17 @@
 <?php
 header("Access-Control-Allow-Origin: http://localhost:5173");
-header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Access-Control-Allow-Credentials: true");
-header("Content-Type: application/json; charset=UTF-8");
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit;
 }
 
-// Conectar MySQL
+// ===========================================
+// CONEXIÓN DB
+// ===========================================
 $conn = new mysqli("localhost", "root", "", "alquiler_vehiculos");
 if ($conn->connect_error) {
     echo json_encode(["error" => "Error DB: " . $conn->connect_error]);
@@ -19,87 +20,130 @@ if ($conn->connect_error) {
 
 $method = $_SERVER["REQUEST_METHOD"];
 
-/* ============================================
-   CREAR RESERVA
-   ============================================ */
-if ($method === "POST") {
-    $input = json_decode(file_get_contents("php://input"), true);
-
-    if (!$input) {
-        echo json_encode(["error" => "JSON inválido"]);
+// ===========================================
+// FUNCION PARA EJECUTAR STMT
+// ===========================================
+function ejecutar_stmt($stmt){
+    if (!$stmt->execute()) {
+        echo json_encode(["error" => $stmt->error]);
         exit;
     }
+    return true;
+}
 
-    // Validar campos obligatorios
-    if (
-        empty($input["fecha_inicio"]) ||
-        empty($input["fecha_fin"]) ||
-        empty($input["placa"]) ||
-        empty($input["id_sucursal"]) ||
-        empty($input["id_usuario"])
-    ) {
-        echo json_encode(["error" => "Faltan datos obligatorios"]);
-        exit;
-    }
-
-    // Datos
-    $fecha_inicio = $input["fecha_inicio"];
-    $fecha_fin = $input["fecha_fin"];
-    $observaciones = $input["observaciones"] ?? "";
-    $placa = $input["placa"];
-    $id_usuario = $input["id_usuario"];
-    $id_sucursal = $input["id_sucursal"];
-
-    /* Validar placa */
-    $checkVeh = $conn->query("SELECT placa FROM Vehiculo WHERE placa='$placa'");
-    if ($checkVeh->num_rows == 0) {
-        echo json_encode(["error" => "La placa no existe"]);
-        exit;
-    }
-
-    /* Validar usuario */
-    $checkUser = $conn->query("SELECT id_usuario FROM Usuarios WHERE id_usuario=$id_usuario");
-    if ($checkUser->num_rows == 0) {
-        echo json_encode(["error" => "El usuario no existe"]);
-        exit;
-    }
-
-    /* Validar sucursal */
-    $checkSuc = $conn->query("SELECT id_sucursal FROM Sucursal WHERE id_sucursal='$id_sucursal'");
-    if ($checkSuc->num_rows == 0) {
-        echo json_encode(["error" => "La sucursal no existe"]);
-        exit;
-    }
-
-    // Insertar reserva
-    $stmt = $conn->prepare("
-        INSERT INTO Reservas 
-        (fecha_inicio, fecha_fin, observaciones, placa, id_usuario, id_sucursal, estado)
-        VALUES (?, ?, ?, ?, ?, ?, 'Pendiente')
+// ===========================================
+// GET — LISTAR RESERVAS
+// ===========================================
+if ($method === "GET") {
+    $result = $conn->query("
+        SELECT r.*, 
+               v.placa, v.color, v.año, v.precio_dia, 
+               u.nombres AS nombre_usuario, u.apellidos AS apellido_usuario,
+               s.nombre_sucursal
+        FROM Reservas r
+        LEFT JOIN Vehiculo v ON r.placa = v.placa
+        LEFT JOIN Usuarios u ON r.id_usuario = u.id_usuario
+        LEFT JOIN Sucursal s ON r.id_sucursal = s.id_sucursal
+        ORDER BY r.id_reserva DESC
     ");
 
-    $stmt->bind_param(
-        "ssssss",
-        $fecha_inicio,
-        $fecha_fin,
-        $observaciones,
-        $placa,
-        $id_usuario,
-        $id_sucursal
-    );
+    $data = [];
+    while ($row = $result->fetch_assoc()) $data[] = $row;
 
-    if ($stmt->execute()) {
-        echo json_encode([
-            "success" => true,
-            "id_reserva" => $stmt->insert_id
-        ]);
-    } else {
-        echo json_encode(["error" => $stmt->error]);
-    }
-
+    echo json_encode($data);
     exit;
 }
 
+// ===========================================
+// POST — CREAR O ACTUALIZAR RESERVA
+// ===========================================
+if ($method === "POST") {
+    $accion = $_POST["accion"] ?? "";
+
+    $id_reserva   = $_POST["id_reserva"] ?? "";
+    $id_usuario   = $_POST["id_usuario"] ?? "";
+    $placa        = $_POST["placa"] ?? "";
+    $id_sucursal  = $_POST["id_sucursal"] ?? "";
+    $fecha_inicio = $_POST["fecha_inicio"] ?? "";
+    $fecha_fin    = $_POST["fecha_fin"] ?? "";
+    $estado       = $_POST["estado"] ?? "Pendiente";
+    $observaciones= $_POST["observaciones"] ?? "";
+
+    if (strtotime($fecha_fin) <= strtotime($fecha_inicio)) {
+        echo json_encode(["error" => "La fecha final debe ser mayor que la inicial"]);
+        exit;
+    }
+
+    if ($accion === "actualizar") {
+        $stmt = $conn->prepare("
+            UPDATE Reservas SET 
+                id_usuario=?, placa=?, id_sucursal=?, fecha_inicio=?, fecha_fin=?, estado=?, observaciones=?
+            WHERE id_reserva=?
+        ");
+        $stmt->bind_param(
+            "issssssi",
+            $id_usuario,
+            $placa,
+            $id_sucursal,
+            $fecha_inicio,
+            $fecha_fin,
+            $estado,
+            $observaciones,
+            $id_reserva
+        );
+
+        ejecutar_stmt($stmt);
+        echo json_encode(["success" => true, "msg" => "Reserva actualizada"]);
+        exit;
+    }
+
+    // CREAR
+    $stmt = $conn->prepare("
+        INSERT INTO Reservas (id_usuario, placa, id_sucursal, fecha_inicio, fecha_fin, estado, observaciones)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    ");
+    $stmt->bind_param(
+        "issssss",
+        $id_usuario,
+        $placa,
+        $id_sucursal,
+        $fecha_inicio,
+        $fecha_fin,
+        $estado,
+        $observaciones
+    );
+
+    ejecutar_stmt($stmt);
+    echo json_encode(["success" => true, "msg" => "Reserva creada"]);
+    exit;
+}
+
+// ===========================================
+// DELETE — ELIMINAR RESERVA
+// ===========================================
+if ($method === "DELETE") {
+
+    if (!isset($_GET["id_reserva"])) {
+        echo json_encode(["error" => "ID de reserva no especificado"]);
+        exit;
+    }
+
+    $id_reserva = intval($_GET["id_reserva"]);
+
+    $stmt = $conn->prepare("DELETE FROM Reservas WHERE id_reserva=?");
+    $stmt->bind_param("i", $id_reserva);
+
+    ejecutar_stmt($stmt);
+
+    echo json_encode(["success" => true, "msg" => "Reserva eliminada"]);
+    exit;
+}
+
+// ===========================================
+// METODO NO SOPORTADO
+// ===========================================
+http_response_code(405);
 echo json_encode(["error" => "Método no soportado"]);
 exit;
+
 ?>

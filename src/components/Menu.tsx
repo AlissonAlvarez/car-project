@@ -43,31 +43,10 @@ const Menu = () => {
             </Link>
           </li>
           <li className="nav-item navegacion">
-            <Link to="/clientes" className="nav-link text-dark d-flex align-items-center gap-2" data-bs-dismiss="offcanvas">
-              <i className="bi bi-people-fill"></i> Clientes
+            <Link to="/reservas" className="nav-link text-dark d-flex align-items-center gap-2" data-bs-dismiss="offcanvas">
+              <i className="bi bi-people-fill"></i> Reservas
             </Link>
           </li>
-          <li className="nav-item navegacion">
-            <Link to="/campanas" className="nav-link text-dark d-flex align-items-center gap-2" data-bs-dismiss="offcanvas">
-              <i className="bi bi-megaphone-fill"></i> Campañas
-            </Link>
-          </li>
-          <li className="nav-item navegacion">
-            <Link to="/metricas" className="nav-link text-dark d-flex align-items-center gap-2" data-bs-dismiss="offcanvas">
-              <i className="bi bi-bar-chart-fill"></i> Métricas
-            </Link>
-          </li>
-          <li className="nav-item navegacion">
-            <Link to="/reportes" className="nav-link text-dark d-flex align-items-center gap-2" data-bs-dismiss="offcanvas">
-              <i className="bi bi-file-earmark-text-fill"></i> Reportes
-            </Link>
-          </li>
-          <li className="nav-item navegacion">
-            <Link to="/usuarios" className="nav-link text-dark d-flex align-items-center gap-2" data-bs-dismiss="offcanvas">
-              <i className="bi bi-person-fill"></i> Usuarios
-            </Link>
-          </li>
-
           {/* BOTÓN CERRAR SESIÓN ADMIN */}
           <li className="nav-item navegacion mt-3">
             <button className="btn btn-danger w-100" onClick={cerrarSesion}>

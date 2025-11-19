@@ -39,78 +39,76 @@ export default function LoginRegister({ onClose, modoReserva, vehiculo }: Props)
 
   // ---------------- LOGIN ----------------
   const loginUsuario = async () => {
-  try {
-    const res = await fetch(API_USUARIOS, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(loginData),
-    });
+    try {
+      const res = await fetch(API_USUARIOS, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(loginData),
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (data.success) {
-      const usuario = data.usuario;
+      if (data.success) {
+        const usuario = data.usuario;
 
-      // ADMIN CON CONTRASEÑA POR DEFECTO
-      if (usuario.email === "admin@alquiler.com" && loginData.contrasena === "admin123") {
-        usuario.rol = "Administrador";
+        // ADMIN CON CONTRASEÑA POR DEFECTO
+        if (usuario.email === "admin@alquiler.com" && loginData.contrasena === "admin123") {
+          usuario.rol = "Administrador";
+        } else {
+          // TODOS LOS DEMÁS SON CLIENTES
+          usuario.rol = "Cliente";
+        }
+
+        localStorage.setItem("usuario", JSON.stringify(usuario));
+        setUsuario(usuario);
+
+        onClose();
+        alert("Login exitoso");
+        if (usuario.rol === "Administrador") {
+          window.location.href = "/dashboard";
+        } else {
+          window.location.href = "/";
+        }
+
       } else {
-        // TODOS LOS DEMÁS SON CLIENTES
-        usuario.rol = "Cliente";
+        alert("Error: " + data.error);
       }
-
-      localStorage.setItem("usuario", JSON.stringify(usuario));
-      setUsuario(usuario);
-
-      onClose();
-      alert("Login exitoso");
-      if (usuario.rol === "Administrador") {
-        window.location.href = "/dashboard";
-      } else {
-        window.location.href = "/";
-      }
-
-    } else {
-      alert("Error: " + data.error);
+    } catch {
+      alert("Error en login");
     }
-  } catch {
-    alert("Error en login");
-  }
-};
-
+  };
 
   // ---------------- REGISTRO ----------------
-const registrarUsuario = async () => {
-  try {
-    const res = await fetch(API_USUARIOS, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(registroData),
-    });
+  const registrarUsuario = async () => {
+    try {
+      const res = await fetch(API_USUARIOS, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(registroData),
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (data.success) {
-      const usuario = data.usuario;
-      localStorage.setItem("usuario", JSON.stringify(usuario));
-      setUsuario(usuario);
-      alert("Registro exitoso");
-      onClose();
-    } else {
-      alert("Error: " + data.error);
+      if (data.success) {
+        const usuario = data.usuario;
+        localStorage.setItem("usuario", JSON.stringify(usuario));
+        setUsuario(usuario);
+        alert("Registro exitoso");
+        onClose();
+      } else {
+        alert("Error: " + data.error);
+      }
+    } catch {
+      alert("Error al registrar usuario");
     }
-  } catch {
-    alert("Error al registrar usuario");
-  }
-};
-
+  };
 
   // ---------------- RESERVA ----------------
   const reservar = async () => {
     const stored = localStorage.getItem("usuario");
-    if (!stored) return alert("Debes iniciar sesión");
+    const usuarioActual: Usuario | null = stored ? JSON.parse(stored) : null;
 
-    const user = JSON.parse(stored);
+    if (!usuarioActual) return alert("Debes iniciar sesión");
 
     const fechaInicio = (document.getElementById("fechaInicio") as HTMLInputElement).value;
     const fechaFin = (document.getElementById("fechaFin") as HTMLInputElement).value;
@@ -118,28 +116,36 @@ const registrarUsuario = async () => {
 
     if (!fechaInicio || !fechaFin) return alert("Selecciona fechas");
 
-    const data = {
-      fecha_inicio: fechaInicio,
-      fecha_fin: fechaFin,
-      observaciones,
-      placa: vehiculo?.placa,
-      id_usuario: user.id_usuario,
-      id_sucursal: "SUC001",
-    };
+    if (new Date(fechaFin) <= new Date(fechaInicio)) {
+      return alert("La fecha final debe ser mayor que la inicial");
+    }
 
-    const res = await fetch(API_RESERVAS, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
+    // --- Ajuste: Enviar como FormData ---
+    const dataForm = new FormData();
+    dataForm.append("fecha_inicio", fechaInicio);
+    dataForm.append("fecha_fin", fechaFin);
+    dataForm.append("observaciones", observaciones);
+    dataForm.append("placa", vehiculo?.placa || "");
+    dataForm.append("id_usuario", String(usuarioActual.id_usuario));
+    dataForm.append("id_sucursal", "SUC001"); // Ajusta según tu DB
+    dataForm.append("estado", "Pendiente");
 
-    const json = await res.json();
+    try {
+      const res = await fetch(API_RESERVAS, {
+        method: "POST",
+        body: dataForm,
+      });
 
-    if (json.success) {
-      alert("Reserva creada");
-      onClose();
-    } else {
-      alert("Error al crear reserva");
+      const json = await res.json();
+
+      if (json.success) {
+        alert("Reserva creada");
+        onClose();
+      } else {
+        alert("Error al crear reserva: " + (json.error || "Error desconocido"));
+      }
+    } catch (error) {
+      alert("Error al crear reserva: " + error);
     }
   };
 
@@ -252,7 +258,6 @@ const registrarUsuario = async () => {
                       <button className="btn btn-danger w-100" onClick={registrarUsuario}>
                         Registrarse
                     </button>
-
 
                       <p className="text-center mt-2">
                         ¿Ya tienes cuenta?{" "}

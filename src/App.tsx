@@ -3,6 +3,7 @@ import HomeVehiculos from './pages/web/InicioWeb'
 import Vehiculos from './pages/app/PageVehiculo'
 import Dashboard from './pages/app/HomeDashboard'
 import PrivateRoute from './components/PrivateRoute'
+import Reservas from './pages/app/PageReservas'
 
 function App() {
   return (
@@ -22,6 +23,14 @@ function App() {
           element={
             <PrivateRoute rolesPermitidos={["Administrador", "Empleado"]}>
               <Vehiculos />
+            </PrivateRoute>
+          } 
+        />
+        <Route 
+          path="/reservas" 
+          element={
+            <PrivateRoute rolesPermitidos={["Administrador", "Empleado"]}>
+              <Reservas />
             </PrivateRoute>
           } 
         />
